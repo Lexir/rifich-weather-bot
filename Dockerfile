@@ -11,7 +11,7 @@ COPY src src
 
 RUN ./gradlew --no-daemon clean bootJar
 
-FROM bellsoft/liberica-runtime-container:jre-21
+FROM  bellsoft/liberica-runtime-container:jdk-crac-cds-slim
 
 WORKDIR /app
 EXPOSE 8080
