@@ -1,5 +1,6 @@
 package ru.salex.weather.bot.commands;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
@@ -10,6 +11,7 @@ import java.util.stream.Collectors;
 
 import static ru.salex.weather.bot.commands.CommandName.UNKNOWN;
 
+@Slf4j
 @Service
 public class CommandHandler {
     private final Map<String, Command> commands;
@@ -21,6 +23,7 @@ public class CommandHandler {
     }
 
     public void handle(Update update) {
+        log.info("Incoming message: {}", update.getMessage());
         if (update.hasMessage() && update.getMessage().hasText()) {
             String commandName = getCommandName(update);
             Command handleCommand = commands.get(commandName);

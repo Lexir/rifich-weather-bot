@@ -6,7 +6,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import ru.salex.weather.bot.client.GeocodingClient;
 import ru.salex.weather.bot.client.WindyClient;
+import ru.salex.weather.bot.domain.ForecastOffset;
+import ru.salex.weather.bot.domain.ForecastSlice;
 import ru.salex.weather.bot.dto.GeocodingResponse;
+import ru.salex.weather.bot.dto.MessageView;
 import ru.salex.weather.bot.dto.WindyRequest;
 import ru.salex.weather.bot.dto.WindyResponse;
 
@@ -16,8 +19,6 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class WindyService {
-
-    public static final double CALVIN_CONST = 273.15;
     private final GeocodingClient geocodingClient;
     private final WindyClient windyClient;
 
@@ -30,11 +31,11 @@ public class WindyService {
             geoResponse = geocodingClient.searchCity(cityName, 1, "ru", "json");
         } catch (Exception e) {
             log.error("Ошибка сервиса геокодирования", e);
-            return "Ошибка сервиса геокодирования: " + e.getMessage();
+            return "❌ Ошибка сервиса геокодирования";
         }
 
         if (geoResponse == null || geoResponse.results() == null || geoResponse.results().isEmpty()) {
-            return "Город не найден. Проверьте правильность написания.";
+            return "❌ Город не найден";
         }
 
         var location = geoResponse.results().getFirst();
@@ -43,9 +44,9 @@ public class WindyService {
             WindyRequest request = new WindyRequest(
                     location.latitude(),
                     location.longitude(),
-                    "gfs",
-                    List.of("temp", "wind", "rh"),
-                    List.of("surface"),
+                    "iconEu",
+                    List.of("temp", "rh", "wind", "precip", "convPrecip", "wind"),
+                    List.of("surface", "950h", "900h", "850h", "800h", "700h"),
                     windyApiKey
             );
 
@@ -54,27 +55,19 @@ public class WindyService {
             return formatMessage(location, windyResponse);
         } catch (Exception e) {
             log.error("Ошибка при получении данных от Windy", e);
-            return "Ошибка при получении данных от Windy (проверьте API Key).";
+            return "❌ Ошибка получения данных от Windy";
         }
     }
 
-    private String formatMessage(GeocodingResponse.Location loc, WindyResponse res) {
-        if (res == null || res.tempSurface() == null) {
-            return "Нет данных от Windy.";
-        }
-        double tempCelsius = res.tempSurface().getFirst() - CALVIN_CONST;
-        double u = res.windU().getFirst();
-        double v = res.windV().getFirst();
-        double windSpeed = Math.sqrt(u * u + v * v);
-        double humidity = res.humidity().getFirst();
+    private String formatMessage(
+            GeocodingResponse.Location location,
+            WindyResponse response
+    ) {
 
-        return """
-                🌬 *Погода (Windy.com)*
-                📍 %s (%s)
-                
-                🌡 Температура: %.1f°C
-                💨 Ветер: %.1f м/с
-                💧 Влажность: %.0f%%
-                """.formatted(loc.name(), loc.country(), tempCelsius, windSpeed, humidity);
+        List<ForecastSlice> slices = ForecastOffset.FIXED.stream()
+                .map(o -> ForecastSlice.from(response, o))
+                .toList();
+
+        return MessageView.render(location, slices);
     }
 }
