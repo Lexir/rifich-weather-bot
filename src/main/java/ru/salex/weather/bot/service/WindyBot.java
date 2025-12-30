@@ -1,6 +1,7 @@
 package ru.salex.weather.bot.service;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.longpolling.interfaces.LongPollingUpdateConsumer;
 import org.telegram.telegrambots.longpolling.starter.SpringLongPollingBot;
@@ -9,6 +10,7 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 import ru.salex.weather.bot.commands.CommandHandler;
 
 @Component
+@Profile("!test")
 public class WindyBot implements SpringLongPollingBot,
         LongPollingSingleThreadUpdateConsumer {
 
