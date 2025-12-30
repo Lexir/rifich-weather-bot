@@ -1,6 +1,5 @@
 package ru.salex.weather.bot.service;
 
-import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
@@ -39,11 +38,5 @@ public class WindyBot implements SpringLongPollingBot,
     @Override
     public void consume(Update update) {
         commandHandler.handle(update);
-    }
-
-    @PostConstruct
-    void logBotToken() {
-        log.info("BOT_TOKEN present = {}",
-                botToken != null && !botToken.isBlank());
     }
 }

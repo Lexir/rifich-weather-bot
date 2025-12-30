@@ -4,7 +4,6 @@ WORKDIR /build
 
 COPY gradlew build.gradle settings.gradle ./
 COPY gradle gradle
-
 RUN chmod +x gradlew
 RUN ./gradlew --no-daemon dependencies
 
@@ -15,12 +14,9 @@ RUN ./gradlew --no-daemon clean bootJar
 FROM  bellsoft/liberica-runtime-container:jdk-crac-cds-slim
 
 WORKDIR /app
-EXPOSE 8080
-
-USER 1001
 
 COPY --from=build /build/build/libs/*.jar app.jar
 
-ENTRYPOINT ["java", \
-  "-XX:MaxRAMPercentage=75", \
-  "-XX:+UseG1G
+EXPOSE 8080
+
+CMD ["java", "-XX:MaxRAMPercentage=75", "-jar", "app.jar"]
