@@ -19,4 +19,4 @@ jobs:
           railwayToken: ${{ secrets.RAILWAY_TOKEN }}
 
       - name: Deploy
-        run: railway up --detach
+        run: railway up --detach --project ${{ secrets.RAILWAY_PROJECT_ID }}
