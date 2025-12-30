@@ -5,6 +5,7 @@ WORKDIR /build
 COPY gradlew build.gradle settings.gradle ./
 COPY gradle gradle
 
+RUN chmod +x gradlew
 RUN ./gradlew --no-daemon dependencies
 
 COPY src src
