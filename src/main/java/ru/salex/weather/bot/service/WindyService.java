@@ -1,5 +1,6 @@
 package ru.salex.weather.bot.service;
 
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -57,6 +58,12 @@ public class WindyService {
             log.error("Ошибка при получении данных от Windy", e);
             return "❌ Ошибка получения данных от Windy";
         }
+    }
+
+    @PostConstruct
+    void logWindyToken() {
+        log.info("WINDY_TOKEN present = {}",
+                windyApiKey != null && !windyApiKey.isBlank());
     }
 
     private String formatMessage(
